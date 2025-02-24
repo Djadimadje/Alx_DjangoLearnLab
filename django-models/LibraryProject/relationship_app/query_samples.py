@@ -4,7 +4,7 @@ from relationship_app.models import Author, Book, Library, Librarian
 def query_books_by_author(author_name):
     try:
         author = Author.objects.get(name=author_name)
-        books = author.books.all()
+        books = Book.objects.filter(author=author)  # Use filter() explicitly
         return [book.title for book in books]
     except Author.DoesNotExist:
         return f"Author '{author_name}' does not exist."
@@ -22,8 +22,10 @@ def query_books_in_library(library_name):
 def query_librarian_for_library(library_name):
     try:
         library = Library.objects.get(name=library_name)
-        librarian = library.librarian
-        return librarian.name if librarian else "No librarian assigned."
+        if library.librarian:  # Explicitly check for None
+            return library.librarian.name
+        else:
+            return "No librarian assigned."
     except Library.DoesNotExist:
         return f"Library '{library_name}' does not exist."
 
