@@ -21,13 +21,17 @@ def query_books_in_library(library_name):
 # Retrieve the librarian for a library
 def query_librarian_for_library(library_name):
     try:
+        # Retrieve the library by name
         library = Library.objects.get(name=library_name)
-        if library.librarian:  # Explicitly check for None
-            return library.librarian.name
-        else:
-            return "No librarian assigned."
+        
+        # Use Librarian.objects.get() to retrieve the librarian for the library
+        librarian = Librarian.objects.get(library=library)
+        
+        return librarian.name
     except Library.DoesNotExist:
         return f"Library '{library_name}' does not exist."
+    except Librarian.DoesNotExist:
+        return "No librarian assigned."
 
 # Example Usage
 if __name__ == "__main__":
