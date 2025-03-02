@@ -10,5 +10,9 @@ urlpatterns = [
 
     # Class-based view for library details
     path('libraries/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
+
+    path('login/', views.login_view, name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('register/', views.register, name='register'),
 ]
 

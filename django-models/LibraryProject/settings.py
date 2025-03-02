@@ -33,3 +33,5 @@ TEMPLATES = [
 ]
 
 # Other settings...
+LOGIN_REDIRECT_URL = '/'  # Where to redirect after successful login
+LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
