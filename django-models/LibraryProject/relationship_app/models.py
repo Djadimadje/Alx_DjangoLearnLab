@@ -44,10 +44,10 @@ class UserProfile(models.Model):
         return f'{self.user.username} - {self.role}'
 
 class Book(models.Model):
-    title = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
     published_date = models.DateField()
-
+    
     class Meta:
         permissions = [
             ("can_add_book", "Can add book"),
