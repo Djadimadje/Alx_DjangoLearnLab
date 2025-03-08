@@ -11,11 +11,27 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'bookshelf',  # Your other app
-    'relationship_app',  # The app with the views and templates
+    
+    # Your Django apps
+    'bookshelf',  # Ensure this app exists in your project
+    'relationship_app',  # Ensure this app exists in your project
 ]
 
-# Templates configuration
+# Middleware Configuration
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# URL Configuration
+ROOT_URLCONF = 'LibraryProject.urls'
+
+# Templates Configuration
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -32,6 +48,35 @@ TEMPLATES = [
     },
 ]
 
-# Other settings...
+# WSGI Application
+WSGI_APPLICATION = 'LibraryProject.wsgi.application'
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
+]
+
+# Database Configuration (Make sure this matches your database setup)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Change this if using PostgreSQL or MySQL
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+# Static Files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Media Files (User Uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Login and Logout Redirects
 LOGIN_REDIRECT_URL = '/'  # Where to redirect after successful login
 LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
+
+# Debugging (Set DEBUG=False in production)
+DEBUG = True
+ALLOWED_HOSTS = []
+

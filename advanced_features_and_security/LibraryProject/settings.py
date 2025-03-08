@@ -14,7 +14,7 @@ INSTALLED_APPS = [
     # Your Django apps
     'bookshelf',  # Ensure this app exists in your project
     'relationship_app',  # Ensure this app exists in your project
-     'accounts'
+    'accounts',
 ]
 
 # Middleware Configuration
@@ -56,7 +56,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
 ]
 
-# Database Configuration (Make sure this matches your database setup)
+# Database Configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Change this if using PostgreSQL or MySQL
@@ -80,4 +80,9 @@ LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
 DEBUG = True
 ALLOWED_HOSTS = []
 
+# Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Default primary key field type (Avoids Django warnings)
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
