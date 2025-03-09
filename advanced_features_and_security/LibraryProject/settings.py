@@ -14,7 +14,7 @@ INSTALLED_APPS = [
     # Your Django apps
     'bookshelf',  # Ensure this app exists in your project
     'relationship_app',  # Ensure this app exists in your project
-    'accounts',
+    'accounts.apps.AccountsConfig',
 ]
 
 # Middleware Configuration
