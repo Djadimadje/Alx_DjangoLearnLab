@@ -11,10 +11,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     # Your Django apps
     'bookshelf',  # Ensure this app exists in your project
     'relationship_app',  # Ensure this app exists in your project
-    'accounts.apps.AccountsConfig',
+    'users',  # Add the app where the CustomUser model is located
+    'accounts',
 ]
 
 # Middleware Configuration
@@ -56,7 +58,10 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
 ]
 
-# Database Configuration
+# Use the Custom User Model
+AUTH_USER_MODEL = 'users.CustomUser'  # Ensure 'users' is the correct app name
+
+# Database Configuration (Make sure this matches your database setup)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Change this if using PostgreSQL or MySQL
@@ -74,15 +79,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Login and Logout Redirects
 LOGIN_REDIRECT_URL = '/'  # Where to redirect after successful login
-LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
+LOGOUT_REDIRECT_URL = '/login/'  # Fixed cut-off error
 
 # Debugging (Set DEBUG=False in production)
 DEBUG = True
-ALLOWED_HOSTS = []
-
-# Custom User Model
-AUTH_USER_MODEL = 'accounts.CustomUser'
-
-# Default primary key field type (Avoids Django warnings)
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+ALLOWED_HOSTS = ['*']  # Allow all hosts (Change in production)
 
