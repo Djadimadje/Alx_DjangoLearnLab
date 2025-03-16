@@ -5,7 +5,7 @@ from bookshelf.models import Article
 
 @permission_required("bookshelf.can_view", raise_exception=True)
 def article_list(request):
-    articles = Article.objects.all()
+   books = Books.objects.all()
     return render(request, "books/book_list.html", {"books": books})
 
 @permission_required("bookshelf.can_create", raise_exception=True)
