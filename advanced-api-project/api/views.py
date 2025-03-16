@@ -1,5 +1,5 @@
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly  # ✅ Correct imports
+from rest_framework import generics, serializers  # ✅ Added serializers import
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly  # ✅ Correct permissions import
 from .models import Book
 from .serializers import BookSerializer
 
@@ -9,6 +9,7 @@ class BookListView(generics.ListAPIView):
     List all books. Open to all users, but can be filtered by publication year.
     """
 
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]  # ✅ Read-only access for unauthenticated users
 
@@ -55,7 +56,7 @@ class BookUpdateView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         if not self.request.data.get('title'):
-            raise serializers.ValidationError("Title cannot be empty.")
+            raise serializers.ValidationError("Title cannot be empty.")  # ✅ Fixed missing serializers import
         instance = serializer.save()
         print(f"Book updated: {instance.title} by {self.request.user}")
 
