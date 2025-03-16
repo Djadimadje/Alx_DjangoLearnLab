@@ -9,7 +9,7 @@ SECRET_KEY = 'django-insecure-6v(7bps5pk3%ywp)c)4+k=(7x+*yr14-s$9#jab0*_0kf1*5fa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True  # Change to False in production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []  # Specify allowed hosts
 
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
@@ -25,7 +25,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware',  # Security middleware must be enabled
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,8 +54,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LibraryProject.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# Database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -64,35 +63,23 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
+# Internationalization settings
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = 'static/'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ===================================
@@ -103,7 +90,13 @@ SECURE_BROWSER_XSS_FILTER = True  # Protects against XSS attacks
 X_FRAME_OPTIONS = 'DENY'  # Prevents Clickjacking
 SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevents MIME-type sniffing
 
-# Only enable these in production (when using HTTPS)
+# Secure cookies
 CSRF_COOKIE_SECURE = True  # Ensures CSRF cookies are sent only over HTTPS
 SESSION_COOKIE_SECURE = True  # Ensures session cookies are sent only over HTTPS
+
+# HTTPS-related settings
+SECURE_SSL_REDIRECT = True  # Redirects HTTP to HTTPS
+SECURE_HSTS_SECONDS = 31536000  # Enables HTTP Strict Transport Security for 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Applies HSTS to all subdomains
+SECURE_HSTS_PRELOAD = True  # Allows HSTS preloading in browsers
 
