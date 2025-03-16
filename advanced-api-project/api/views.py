@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.filters import SearchFilter  # Import for search functionality
 from .models import Book
+from django_filters import rest_framework
 from .serializers import BookSerializer
 
 # ListView: Retrieve all books, open to all users with filtering and searching
