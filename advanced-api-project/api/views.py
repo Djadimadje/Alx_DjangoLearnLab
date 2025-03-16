@@ -1,23 +1,29 @@
-from rest_framework import generics
+from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework.filters import SearchFilter  # Import for search functionality
-from .models import Book
+from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework
+from .models import Book
 from .serializers import BookSerializer
 
-# ListView: Retrieve all books, open to all users with filtering and searching
+# ListView: Retrieve all books, open to all users with filtering, searching, and ordering
 class BookListView(generics.ListAPIView):
     """
     Retrieve a list of all books. Supports:
-    - Filtering by publication year via query parameter (e.g., ?year=2000).
+    - Filtering by title, publication_year, or author name (e.g., ?title=Harry, ?publication_year=1997, ?author__name=Rowling).
     - Searching by title or author name via query parameter (e.g., ?search=Harry).
+    - Ordering by title or publication_year via query parameter (e.g., ?ordering=title, ?ordering=-publication_year).
     Accessible to all users (read-only).
-    """
-
+    """  
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]  # Explicitly allow read-only access
-    filter_backends = [SearchFilter]  # Add SearchFilter for search functionality
-    search_fields = ['title', 'author__name']  # Fields to search (title and author's name)
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    # Ensuring that OrderingFilter and SearchFilter are properly used
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]  
+    filterset_fields = ['title', 'publication_year', 'author__name']  # Fields for filtering
+    search_fields = ['title', 'author__name']  # Fields for searching
+    ordering_fields = ['title', 'publication_year']  # Fields for ordering
+    ordering = ['title']  # Default ordering (alphabetical by title)
 
     def get_queryset(self):
         # Custom filter: Return books published on or after the specified year
@@ -34,20 +40,18 @@ class BookDetailView(generics.RetrieveAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]  # Explicitly allow read-only access
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 # CreateView: Add a new book, restricted to authenticated users
 class BookCreateView(generics.CreateAPIView):
     """
     Create a new book instance. Only authenticated users can access this endpoint.
-    Custom behavior: Logs the creation event.
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]  # Restrict to authenticated users only
-
+    permission_classes = [IsAuthenticated]
+    
     def perform_create(self, serializer):
-        # Custom hook: Log creation event
         instance = serializer.save()
         print(f"Book created: {instance.title} by {self.request.user}")
 
@@ -55,14 +59,12 @@ class BookCreateView(generics.CreateAPIView):
 class BookUpdateView(generics.UpdateAPIView):
     """
     Update an existing book by ID. Only authenticated users can modify books.
-    Custom behavior: Ensures title is not empty before saving.
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]  # Restrict to authenticated users only
-
+    permission_classes = [IsAuthenticated]
+    
     def perform_update(self, serializer):
-        # Custom validation: Prevent empty titles
         if not self.request.data.get('title'):
             raise serializer.ValidationError("Title cannot be empty.")
         instance = serializer.save()
@@ -75,4 +77,5 @@ class BookDeleteView(generics.DestroyAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]  # Restrict to authenticated users only
+    permission_classes = [IsAuthenticated]
+
