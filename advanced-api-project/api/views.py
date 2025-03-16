@@ -1,17 +1,22 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.filters import SearchFilter  # Import for search functionality
 from .models import Book
 from .serializers import BookSerializer
 
-# ListView: Retrieve all books, open to all users with optional filtering
+# ListView: Retrieve all books, open to all users with filtering and searching
 class BookListView(generics.ListAPIView):
     """
-    Retrieve a list of all books. Supports optional filtering by publication year
-    via query parameter (e.g., ?year=2000). Accessible to all users (read-only).
+    Retrieve a list of all books. Supports:
+    - Filtering by publication year via query parameter (e.g., ?year=2000).
+    - Searching by title or author name via query parameter (e.g., ?search=Harry).
+    Accessible to all users (read-only).
     """
 
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]  # Explicitly allow read-only access
+    filter_backends = [SearchFilter]  # Add SearchFilter for search functionality
+    search_fields = ['title', 'author__name']  # Fields to search (title and author's name)
 
     def get_queryset(self):
         # Custom filter: Return books published on or after the specified year
