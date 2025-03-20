@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.db.models import Q  # Import Q for search functionality
 from .forms import RegisterForm, ProfileUpdateForm, CommentForm
 from .models import Profile, Post, Comment
 
@@ -16,8 +15,8 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            Profile.objects.create(user=user)  # Create a profile for the new user
-            login(request, user)  # Automatically log in the user
+            Profile.objects.create(user=user)
+            login(request, user)
             messages.success(request, "Registration successful. Welcome!")
             return redirect("blog:profile")
     else:
@@ -61,27 +60,30 @@ def profile_view(request):
 
     return render(request, "blog/profile.html", {"form": form, "profile": profile})
 
-# ============================
-# CRUD Operations for Blog Posts
-# ============================
-
-# ListView: Displays all blog posts with search functionality
+# ListView: Displays all blog posts
 class PostListView(ListView):
     model = Post
-    template_name = 'blog/post_list.html'  # Template should be in /templates/blog/post_list.html
+    template_name = 'blog/post_list.html'
     context_object_name = 'posts'
-    ordering = ['-published_date']  # Show newest posts first
+    ordering = ['-published_date']
+
+# Search functionality
+class PostSearchView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts'
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        query = self.request.GET.get('q')
+        query = self.request.GET.get("q")
         if query:
-            queryset = queryset.filter(
-                Q(title__icontains=query) | 
-                Q(content__icontains=query) |
-                Q(tags__name__icontains=query)  # Search by tags
+            return Post.objects.filter(
+                title__icontains=query
+            ) | Post.objects.filter(
+                content__icontains=query
+            ) | Post.objects.filter(
+                tags__name__icontains=query
             ).distinct()
-        return queryset
+        return Post.objects.all()
 
 # DetailView: Displays a single blog post with comments
 class PostDetailView(DetailView):
@@ -92,12 +94,11 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         post = self.get_object()
-        comments = post.comments.all()
-        context['comments'] = comments
+        context['comments'] = post.comments.all()
         context['comment_form'] = CommentForm()
         return context
 
-# CreateView: Allows authenticated users to create a post
+# Post Creation View
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     template_name = 'blog/post_form.html'
@@ -107,7 +108,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-# UpdateView: Allows the author of a post to edit it
+# Post Update View
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     template_name = 'blog/post_form.html'
@@ -121,21 +122,17 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         post = self.get_object()
         return self.request.user == post.author
 
-# DeleteView: Allows the author of a post to delete it
+# Post Delete View
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = 'blog/post_confirm_delete.html'
-    success_url = reverse_lazy('blog:post-list')
+    success_url = reverse_lazy('post-list')
 
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
 
-# ============================
-# CRUD Operations for Comments
-# ============================
-
-# CreateView: Allows authenticated users to create a comment
+# Comment Create View
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
@@ -149,15 +146,11 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('blog:post-detail', kwargs={'pk': self.object.post.id})
 
-# UpdateView: Allows the comment author to edit their comment
+# Comment Update View
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment_form.html'
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
 
     def test_func(self):
         comment = self.get_object()
@@ -166,7 +159,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('blog:post-detail', kwargs={'pk': self.object.post.id})
 
-# DeleteView: Allows the comment author to delete their comment
+# Comment Delete View
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
     template_name = 'blog/comment_confirm_delete.html'
