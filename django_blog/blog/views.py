@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.db.models import Q  # Import Q for search functionality
 from .forms import RegisterForm, ProfileUpdateForm, CommentForm
 from .models import Profile, Post, Comment
 
@@ -31,7 +32,7 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, "You have successfully logged in.")
-            return redirect("blog:profile")  # Redirect to profile page after login
+            return redirect("blog:profile")
         else:
             messages.error(request, "Invalid username or password.")
     else:
@@ -42,7 +43,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out.")
-    return redirect("blog:login")  # Redirect to login page after logout
+    return redirect("blog:login")
 
 # User Profile View
 @login_required
@@ -64,42 +65,53 @@ def profile_view(request):
 # CRUD Operations for Blog Posts
 # ============================
 
-# ListView: Displays all blog posts
+# ListView: Displays all blog posts with search functionality
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'  # Template should be in /templates/blog/post_list.html
     context_object_name = 'posts'
     ordering = ['-published_date']  # Show newest posts first
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | 
+                Q(content__icontains=query) |
+                Q(tags__name__icontains=query)  # Search by tags
+            ).distinct()
+        return queryset
+
 # DetailView: Displays a single blog post with comments
 class PostDetailView(DetailView):
     model = Post
-    template_name = 'blog/post_detail.html'  # Template should be in /templates/blog/post_detail.html
+    template_name = 'blog/post_detail.html'
     context_object_name = 'post'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         post = self.get_object()
-        comments = post.comments.all()  # Fetch all comments for this post
+        comments = post.comments.all()
         context['comments'] = comments
-        context['comment_form'] = CommentForm()  # Provide a form to add new comments
+        context['comment_form'] = CommentForm()
         return context
 
 # CreateView: Allows authenticated users to create a post
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    template_name = 'blog/post_form.html'  # Template for creating a post
-    fields = ['title', 'content']
+    template_name = 'blog/post_form.html'
+    fields = ['title', 'content', 'tags']
 
     def form_valid(self, form):
-        form.instance.author = self.request.user  # Set the author to the logged-in user
+        form.instance.author = self.request.user
         return super().form_valid(form)
 
 # UpdateView: Allows the author of a post to edit it
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    template_name = 'blog/post_form.html'  # Reuse the same template as CreateView
-    fields = ['title', 'content']
+    template_name = 'blog/post_form.html'
+    fields = ['title', 'content', 'tags']
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -107,17 +119,17 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         post = self.get_object()
-        return self.request.user == post.author  # Only the post's author can edit
+        return self.request.user == post.author
 
 # DeleteView: Allows the author of a post to delete it
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
-    template_name = 'blog/post_confirm_delete.html'  # Confirmation template
-    success_url = reverse_lazy('post-list')  # Redirect to the post list after deletion
+    template_name = 'blog/post_confirm_delete.html'
+    success_url = reverse_lazy('blog:post-list')
 
     def test_func(self):
         post = self.get_object()
-        return self.request.user == post.author  # Only the author can delete
+        return self.request.user == post.author
 
 # ============================
 # CRUD Operations for Comments
@@ -149,7 +161,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         comment = self.get_object()
-        return self.request.user == comment.author  # Only the comment's author can edit
+        return self.request.user == comment.author
 
     def get_success_url(self):
         return reverse_lazy('blog:post-detail', kwargs={'pk': self.object.post.id})
@@ -161,8 +173,7 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         comment = self.get_object()
-        return self.request.user == comment.author  # Only the comment's author can delete
+        return self.request.user == comment.author
 
     def get_success_url(self):
         return reverse_lazy('blog:post-detail', kwargs={'pk': self.object.post.id})
-
