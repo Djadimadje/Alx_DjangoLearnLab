@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     login_view, logout_view, register_view, profile_view,
-    PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView
+    PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView, search_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -26,5 +26,13 @@ urlpatterns = [
     path("password-reset/done/", auth_views.PasswordResetDoneView.as_view(template_name="blog/password_reset_done.html"), name="password_reset_done"),
     path("password-reset-confirm/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(template_name="blog/password_reset_confirm.html"), name="password_reset_confirm"),
     path("password-reset-complete/", auth_views.PasswordResetCompleteView.as_view(template_name="blog/password_reset_complete.html"), name="password_reset_complete"),
+
+
+    # Search URL
+    path("search/", search_view, name="search"),
+
+    # URL for viewing posts by tag
+    path("tags/<str:tag_name>/", views.posts_by_tag, name="posts_by_tag"),
+
 ]
 

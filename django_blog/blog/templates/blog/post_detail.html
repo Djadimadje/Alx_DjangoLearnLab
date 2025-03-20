@@ -16,4 +16,35 @@
         <a href="{% url 'blog:post-list' %}" class="btn btn-secondary">Back to Posts</a>
     </div>
 </div>
+
+<div class="comments-section mt-5">
+    <h3>Comments</h3>
+    
+    {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'blog:add_comment' post.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea name="content" class="form-control" rows="3" placeholder="Write your comment..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+    {% else %}
+        <p>You need to be logged in to post a comment.</p>
+    {% endif %}
+
+    <!-- Display Comments -->
+    <ul class="list-group mt-4">
+        {% for comment in post.comments.all %}
+            <li class="list-group-item">
+                <p><strong>{{ comment.author.username }}</strong> said:</p>
+                <p>{{ comment.content }}</p>
+                <p><small>Posted on {{ comment.date_posted }}</small></p>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No comments yet. Be the first to comment!</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
 {% endblock %}
