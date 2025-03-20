@@ -1,0 +1,19 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2>{{ post.title }}</h2>
+        <p><small>By {{ post.author }} | Published on {{ post.published_date }}</small></p>
+        <hr>
+        <p>{{ post.content }}</p>
+
+        {% if user == post.author %}
+            <a href="{% url 'blog:post-update' post.pk %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'blog:post-delete' post.pk %}" class="btn btn-danger">Delete</a>
+        {% endif %}
+        
+        <a href="{% url 'blog:post-list' %}" class="btn btn-secondary">Back to Posts</a>
+    </div>
+</div>
+{% endblock %}
