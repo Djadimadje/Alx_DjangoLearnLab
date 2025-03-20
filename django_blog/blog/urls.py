@@ -23,7 +23,7 @@ urlpatterns = [
     path("post/<int:pk>/delete/", PostDeleteView.as_view(), name="post-delete"),  # Delete a post
 
     # Comment URLs (Create, Edit, Delete)
-    path("post/<int:post_id>/comments/new/", add_comment, name="add-comment"),  # Add new comment
+    path("post/<int:pk>/comments/new/", add_comment, name="add-comment"),  # Add new comment to a post
     path("comment/<int:pk>/update/", edit_comment, name="edit-comment"),  # Edit comment
     path("comment/<int:pk>/delete/", delete_comment, name="delete-comment"),  # Delete comment
 
