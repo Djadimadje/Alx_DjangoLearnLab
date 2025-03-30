@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated  # Explicitly import both
+from rest_framework.permissions import AllowAny, IsAuthenticated  # Explicitly imported
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
@@ -52,8 +52,8 @@ class ProfileView(generics.GenericAPIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
-class FollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can follow
+class FollowUserView(APIView):  # Changed to APIView to enforce explicit permissions
+    permission_classes = [IsAuthenticated]  # Ensuring authentication is required
 
     def post(self, request, user_id):
         user_to_follow = get_object_or_404(CustomUser, id=user_id)
@@ -62,8 +62,8 @@ class FollowUserView(generics.GenericAPIView):
         request.user.follow(user_to_follow)
         return Response({"message": f"You are now following {user_to_follow.username}."}, status=status.HTTP_200_OK)
 
-class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can unfollow
+class UnfollowUserView(APIView):  # Changed to APIView to enforce explicit permissions
+    permission_classes = [IsAuthenticated]  # Ensuring authentication is required
 
     def post(self, request, user_id):
         user_to_unfollow = get_object_or_404(CustomUser, id=user_id)
