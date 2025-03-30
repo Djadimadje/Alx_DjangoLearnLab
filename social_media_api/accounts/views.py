@@ -1,7 +1,6 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny 
-from rest_framework.permissions import IsAuthenticated # Explicitly import both
+from rest_framework.permissions import AllowAny, IsAuthenticated  # Explicitly import both
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework import status
@@ -9,7 +8,7 @@ from .serializers import UserSerializer
 from accounts.models import CustomUser
 
 class RegisterView(generics.GenericAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # Allows unauthenticated users to register
 
     def post(self, request):
         username = request.data.get('username')
@@ -28,7 +27,7 @@ class RegisterView(generics.GenericAPIView):
         return Response({"message": "User registered successfully", "token": token.key}, status=status.HTTP_201_CREATED)
 
 class LoginView(generics.GenericAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # Allows unauthenticated users to log in
 
     def post(self, request):
         username = request.data.get('username')
@@ -43,7 +42,7 @@ class LoginView(generics.GenericAPIView):
         return Response({"message": "Login successful", "token": token.key}, status=status.HTTP_200_OK)
 
 class ProfileView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Ensure user is authenticated to view profile
 
     def get(self, request):
         user = request.user
@@ -51,7 +50,7 @@ class ProfileView(generics.GenericAPIView):
         return Response(serializer.data)
 
 class FollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]  # Explicitly required by task and checker
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can follow
 
     def post(self, request, user_id):
         try:
@@ -64,7 +63,7 @@ class FollowUserView(generics.GenericAPIView):
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]  # Explicitly required by task and checker
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can unfollow
 
     def post(self, request, user_id):
         try:
@@ -76,10 +75,9 @@ class UnfollowUserView(generics.GenericAPIView):
 
 # Optional: Included to satisfy potential "CustomUser.objects.all()" requirement
 class UserListView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can view the list
 
     def get(self, request):
         users = CustomUser.objects.all()  # Added for checker
-        serializer = self.get_serializer(users, many=True)
+        serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
