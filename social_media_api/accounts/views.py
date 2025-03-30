@@ -1,11 +1,14 @@
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated  # Explicitly import both
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-from rest_framework import status
+from django.shortcuts import get_object_or_404
 from .serializers import UserSerializer
 from accounts.models import CustomUser
+from posts.models import Post
+from posts.serializers import PostSerializer
 
 class RegisterView(generics.GenericAPIView):
     permission_classes = [AllowAny]  # Allows unauthenticated users to register
@@ -53,31 +56,33 @@ class FollowUserView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can follow
 
     def post(self, request, user_id):
-        try:
-            user_to_follow = CustomUser.objects.get(id=user_id)
-            if user_to_follow == request.user:
-                return Response({"error": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
-            request.user.follow(user_to_follow)
-            return Response({"message": f"You are now following {user_to_follow.username}."}, status=status.HTTP_200_OK)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        user_to_follow = get_object_or_404(CustomUser, id=user_id)
+        if user_to_follow == request.user:
+            return Response({"error": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.follow(user_to_follow)
+        return Response({"message": f"You are now following {user_to_follow.username}."}, status=status.HTTP_200_OK)
 
 class UnfollowUserView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can unfollow
 
     def post(self, request, user_id):
-        try:
-            user_to_unfollow = CustomUser.objects.get(id=user_id)
-            request.user.unfollow(user_to_unfollow)
-            return Response({"message": f"You have unfollowed {user_to_unfollow.username}."}, status=status.HTTP_200_OK)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        user_to_unfollow = get_object_or_404(CustomUser, id=user_id)
+        request.user.unfollow(user_to_unfollow)
+        return Response({"message": f"You have unfollowed {user_to_unfollow.username}."}, status=status.HTTP_200_OK)
 
-# Optional: Included to satisfy potential "CustomUser.objects.all()" requirement
 class UserListView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can view the list
 
     def get(self, request):
-        users = CustomUser.objects.all()  # Added for checker
+        users = CustomUser.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+
+class UserFeedView(APIView):
+    permission_classes = [IsAuthenticated]  # Only authenticated users can view their feed
+
+    def get(self, request):
+        followed_users = request.user.following.all()  # Get all users the current user follows
+        posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')  # Get their posts
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
