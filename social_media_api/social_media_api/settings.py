@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Custom apps
     'accounts',
    'posts'
+  'notifications',
 ]
 
 MIDDLEWARE = [
