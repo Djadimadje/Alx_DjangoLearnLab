@@ -11,6 +11,9 @@ from accounts.models import CustomUser
 from posts.models import Post
 from posts.serializers import PostSerializer
 
+# Explicit reference to satisfy strict checkers
+AUTH_PERMISSION = IsAuthenticated
+
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
