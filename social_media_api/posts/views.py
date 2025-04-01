@@ -17,8 +17,8 @@ class PostViewSet(viewsets.ModelViewSet):
         Otherwise, return all posts.
         """
         if self.action == 'feed' and self.request.user.is_authenticated:
-            followed_users = self.request.user.following.all()
-            return Post.objects.filter(author__in=followed_users).select_related('author').order_by('-created_at')
+            following_users = self.request.user.following.all()
+            return Post.objects.filter(author__in=following_users).select_related('author').order_by('-created_at')
         return Post.objects.all().select_related('author').order_by('-created_at')
 
     def perform_create(self, serializer):
@@ -32,8 +32,8 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         Retrieves posts from followed users.
         """
-        followed_users = request.user.following.all()
-        posts = Post.objects.filter(author__in=followed_users).select_related('author').order_by('-created_at')
+        following_users = request.user.following.all()
+        posts = Post.objects.filter(author__in=following_users).select_related('author').order_by('-created_at')
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
