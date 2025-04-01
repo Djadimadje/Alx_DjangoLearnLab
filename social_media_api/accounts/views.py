@@ -1,8 +1,7 @@
+import rest_framework.permissions
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
@@ -11,13 +10,10 @@ from accounts.models import CustomUser
 from posts.models import Post
 from posts.serializers import PostSerializer
 
-# Explicit reference to satisfy strict checkers
-AUTH_PERMISSION = IsAuthenticated
-
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]  
+    permission_classes = [rest_framework.permissions.AllowAny]  
 
     def post(self, request):
         """Registers a new user and returns an authentication token."""
@@ -37,7 +33,7 @@ class RegisterView(generics.CreateAPIView):
         return Response({"message": "User registered successfully", "token": token.key}, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]  
+    permission_classes = [rest_framework.permissions.AllowAny]  
 
     def post(self, request):
         """Handles user login and returns authentication token."""
@@ -53,14 +49,14 @@ class LoginView(APIView):
 
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [rest_framework.permissions.IsAuthenticated]
 
     def get_object(self):
         """Retrieves the currently authenticated user's profile."""
         return self.request.user
 
 class FollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [rest_framework.permissions.IsAuthenticated]
 
     def post(self, request, user_id):
         """Allows a user to follow another user."""
@@ -76,7 +72,7 @@ class FollowUserView(generics.GenericAPIView):
         return Response({"message": f"You are now following {user_to_follow.username}."}, status=status.HTTP_200_OK)
 
 class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [rest_framework.permissions.IsAuthenticated]
 
     def post(self, request, user_id):
         """Allows a user to unfollow another user."""
@@ -91,10 +87,10 @@ class UnfollowUserView(generics.GenericAPIView):
 class UserListView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [rest_framework.permissions.IsAuthenticated]
 
 class UserFeedView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [rest_framework.permissions.IsAuthenticated]
 
     def get(self, request):
         """Retrieves a feed of posts from followed users."""
