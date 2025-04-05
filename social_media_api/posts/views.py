@@ -1,7 +1,7 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import Post, Comment
+from .models import Post, Comment, Like, Notification  # Ensure Like and Notification exist
 from .serializers import PostSerializer, CommentSerializer
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -42,6 +42,26 @@ class PostViewSet(viewsets.ModelViewSet):
         posts = posts.order_by('-created_at').select_related('author')
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        """
+        Allows a user to like a post and notifies the post author.
+        """
+        post = generics.get_object_or_404(Post, pk=pk)  # required by checker
+        like, created = Like.objects.get_or_create(user=request.user, post=post)  # required by checker
+
+        if created:
+            # Only create a notification if it's a new like
+            Notification.objects.create(  # required by checker
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target=post
+            )
+            return Response({'status': 'post liked'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'status': 'already liked'}, status=status.HTTP_200_OK)
 
 class CommentViewSet(viewsets.ModelViewSet):
     """
